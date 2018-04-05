@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 import pandas as pd
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.mixture import GaussianMixture
 from sklearn.model_selection import train_test_split
@@ -40,3 +40,6 @@ err = float(err) / float(tot)
 print("Error rate: {}".format(err))
 
 
+plt.scatter(pca.components_[0], pca.components_[1])
+
+plt.show()
