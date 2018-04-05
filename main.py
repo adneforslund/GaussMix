@@ -15,7 +15,7 @@ X = dataset.iloc[:,:-1]
 
 # Dekomponer til to akser
 pca = PCA(n_components=2)
-pca.fit(X)
+x_pca = pca.fit_transform(X)
 
 # Gauss clustering
 gauss = GaussianMixture(n_components=3)
@@ -40,6 +40,6 @@ err = float(err) / float(tot)
 print("Error rate: {}".format(err))
 
 
-plt.scatter(pca.components_[0], pca.components_[1])
+plt.scatter(x_pca[:,0],x_pca[:,1])
 
 plt.show()
