@@ -47,6 +47,13 @@ print("Gauss Error rate: {}".format(rateGauss))
 print("kMeans Error rate: {}".format(rateKmeans))
 
 
-plt.scatter(x_pca[:,0],x_pca[:,1])
-plt.scatter(x_pca[:, 0], x_pca[:, 1])
+gaussPlot = plt.figure(1)
+plt.subplot(211)
+plt.scatter(x_pca[:,0],x_pca[:,1], c=y)
+
+meansPlot = plt.figure(1)
+plt.subplot(212)
+plt.scatter(x_pca[:, 0], x_pca[:, 1], c=y)
+
 plt.show()
+
