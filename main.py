@@ -13,9 +13,11 @@ dataset = pd.read_table("seeds_dataset.txt", delim_whitespace=True)
 y = dataset.iloc[:,-1]
 X = dataset.iloc[:,:-1]
 
+
 # Dekomponer til to akser
 pca = PCA(n_components=2)
-pca.fit(X)
+X_pca = pca.fit_transform(X)
+print("{}".format(X_pca))
 
 # Gauss clustering
 gauss = GaussianMixture(n_components=3)
@@ -27,15 +29,13 @@ gauss.fit(X)
 
 preds = gauss.predict(X)
 
-print("real: {}, pred: {}".format(rescale_test, gauss.predict(X)))
-
+# Regn ut feilrate
 err = 0
 tot = 0
 for i in range(0, len(rescale_test)):
     if rescale_test[i] != preds[i]:
         err += 1
     tot += 1
-
 err = float(err) / float(tot)
 print("Error rate: {}".format(err))
 
