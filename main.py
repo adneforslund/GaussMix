@@ -30,30 +30,14 @@ preds = gauss.predict(x_pca)
 meanPredict = means.predict(x_pca)
 print("real: {}, pred: {}".format(rescale_test, preds))
 
-def errorRate(preds, verification):
-    err = 0
-    tot = 0
-    for i in range(0, len(verification)):
-        if verification[i] != preds[i]:
-            err += 1
-        tot += 1
-    return float(err)/tot
-
-rateGauss = errorRate(preds, rescale_test)
-rateKmeans = errorRate(meanPredict, rescale_test)
-
-
-print("Gauss Error rate: {}".format(rateGauss))
-print("kMeans Error rate: {}".format(rateKmeans))
-
-
 gaussPlot = plt.figure(1)
 plt.subplot(211)
 plt.scatter(x_pca[:,0],x_pca[:,1], c=y)
+plt.scatter(x_pca[:,0], x_pca[:, 1], c=preds, marker='x', s=16)
 
 meansPlot = plt.figure(1)
 plt.subplot(212)
 plt.scatter(x_pca[:, 0], x_pca[:, 1], c=y)
+plt.scatter(x_pca[:, 0], x_pca[:, 1], c=meanPredict, marker='x', s=16)
 
 plt.show()
-
