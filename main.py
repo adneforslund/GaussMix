@@ -25,11 +25,11 @@ gauss = GaussianMixture(n_components=n)
 means = KMeans(n_clusters=n)
 # Datasettet er i range 1..3, sett til 0..2
 rescale_test = [i - 1 for i in y.values]
-means.fit(x_pca)
-gauss.fit(x_pca)
+means.fit(X)
+gauss.fit(X)
 
-preds = gauss.predict(x_pca)
-meanPredict = means.predict(x_pca)
+preds = gauss.predict(X)
+meanPredict = means.predict(X)
 
 def errorRate(pred, test):
     tot = 0
