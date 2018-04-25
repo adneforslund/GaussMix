@@ -92,12 +92,21 @@ def alignLabels(preds, test, n_clusters):
 gaussPrediction = alignLabels(gaussPrediction, rescale_test, n)
 meanPrediction = alignLabels(meanPrediction, rescale_test, n)
 
-circle1 = Circle((0.5, 0.5), color='r', alpha = 0.3, radius=5)
+
 fig, axes = plt.subplots(1,2)
-axes[0].add_artist(circle1)
 
 fig.suptitle("KMeans and Gaussian Mixture Clustering")
+means.fit(x_pca)
+# koordinater for centroids i en array
+C = means.cluster_centers_
 
+colors = ['r', 'g', 'b']
+for i, color in zip(C, colors):
+    circle = Circle((i[0], i[1]),radius=2, alpha=0.3, color=color)
+    axes[1].add_artist(circle)
+    center_circle = Circle((i[0], i[1]), radius = 0.1, alpha = 1, color = "black")
+    axes[1].add_artist(center_circle)
+print(str(C))
 axes[0].set_title("Guassian Mixture")
 axes[0].scatter(x_pca[:, 0], x_pca[:, 1], c=rescale_test,
                 marker='o', s=100, label="Test data")
@@ -105,6 +114,7 @@ axes[0].scatter(x_pca[:, 0], x_pca[:, 1], c=gaussPrediction,
                 marker='^', s=30, label="Clustering", edgecolors='white')
 axes[0].set_xlabel("Error rate: {:.2f}%".format(errorRate(gaussPrediction, rescale_test) * 100.0))
 axes[0].legend()
+
 
 
 axes[1].set_title("KMeans")
