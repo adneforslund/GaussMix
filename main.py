@@ -27,8 +27,8 @@ means = KMeans(n_clusters=n)
 
 # Datasettets klasser har verdiene 1..3, sett til 0..2
 rescale_test = [i - 1 for i in y.values]
-means.fit(x_pca)
-gauss.fit(x_pca)
+means.fit(X)
+gauss.fit(X)
 
 gaussPrediction = gauss.predict(x_pca)
 meanPrediction = means.predict(x_pca)
