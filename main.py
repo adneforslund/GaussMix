@@ -9,9 +9,9 @@ from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
 from matplotlib.patches import Circle
 
-def run(display_intermediaries):    
+def run(display_intermediaries, path, savePath):    
     # Last datasettet
-    dataset = pd.read_table("seeds_dataset.txt", delim_whitespace=True)
+    dataset = pd.read_table(path, delim_whitespace=True)
 
 
     # Fjern klassene fra datasettet
@@ -48,7 +48,7 @@ def run(display_intermediaries):
 
     gaussPrediction = alignLabels(gaussPrediction, rescale_test, n)
     meanPrediction = alignLabels(meanPrediction, rescale_test, n)
-
+    
     fig, axes = plt.subplots(1,2)
     
     fig.suptitle("KMeans and Gaussian Mixture Clustering")
@@ -58,7 +58,7 @@ def run(display_intermediaries):
     
     colors = ['r', 'g', 'b']
     for i, color in zip(C, colors):
-        circle = Circle((i[0], i[1]),radius=2, alpha=0.3, color=color)
+        circle = Circle((i[0], i[1]),radius=2, alpha=0.2, color=color)
         axes[1].add_artist(circle)
         center_circle = Circle((i[0], i[1]), radius = 0.1, alpha = 1, color = "black")
         axes[1].add_artist(center_circle)
@@ -77,7 +77,11 @@ def run(display_intermediaries):
                     marker='^', s=30, label="Clustering", edgecolors='white')
     axes[1].set_xlabel("Error rate: {:.2f}%".format(errorRate(meanPrediction, rescale_test) * 100.0))
     axes[1].legend()
+    if savePath != None:
+        fig.savefig(savePath)
     plt.show()
+
+    
     
 
 def errorRate(pred, test):
@@ -129,7 +133,14 @@ def alignLabels(preds, test, n_clusters):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Display clustering for seed dataset")
-    parser.add_argument("-x", "--extra", help="Display extra plots", action="store_true")
+    parser.add_argument("-f", "--file", dest="myPath",
+                        help="Give a path to your dataset", required=True
+                        )
+    parser.add_argument("-x", "--extra", help="Display extra plots", action="store_true", required = False)
+    parser.add_argument("-s", "--save", help="Save plots as png, given pathname", required = False, dest="savePath"  )
     args = parser.parse_args()
+    path = args.myPath
+    savePath = args.savePath
+    
     display_intermediaries = args.extra
-    run(display_intermediaries)
+    run(display_intermediaries, path, savePath)
