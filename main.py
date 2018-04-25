@@ -8,39 +8,60 @@ from sklearn.mixture import GaussianMixture
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
 
-# Last datasettet
-dataset = pd.read_table("seeds_dataset.txt", delim_whitespace=True)
+def run(display_intermediaries):
+    # Last datasettet
+    dataset = pd.read_table("seeds_dataset.txt", delim_whitespace=True)
 
+    # Fjern klassene fra datasettet
+    y = dataset.iloc[:,-1]
+    X = dataset.iloc[:,:-1]
+    n = 3
 
-# Fjern klassene fra datasettet
-y = dataset.iloc[:,-1]
-X = dataset.iloc[:,:-1]
-n = 3
+    # Dekomponer til to akser
+    pca = PCA(n_components=2)
+    x_pca = pca.fit_transform(X)
 
-# Dekomponer til to akser
-pca = PCA(n_components=2)
-x_pca = pca.fit_transform(X)
+    # Gauss clustering
+    gauss = GaussianMixture(n_components=n)
+    means = KMeans(n_clusters=n)
 
-# Gauss clustering
-gauss = GaussianMixture(n_components=n)
-means = KMeans(n_clusters=n)
+    # Datasettets klasser har verdiene 1..3, sett til 0..2
+    rescale_test = [i - 1 for i in y.values]
+    means.fit(X)
+    gauss.fit(X)
 
-# Datasettets klasser har verdiene 1..3, sett til 0..2
-rescale_test = [i - 1 for i in y.values]
-means.fit(X)
-gauss.fit(X)
+    gaussPrediction = gauss.predict(X)
+    meanPrediction = means.predict(X)
 
-gaussPrediction = gauss.predict(X)
-meanPrediction = means.predict(X)
+    if display_intermediaries:
+        fig, axes = plt.subplots(7, 7, figsize = (12, 12),
+                                 subplot_kw = {'xticks': (), 'yticks': ()})
+        for x in range(0,7):
+            for y in range(0,7):
+                axes[x,y].scatter(X.iloc[:, x], X.iloc[:, y], s=40)
 
-fig, axes = plt.subplots(7, 7, figsize = (12, 12),
-                            subplot_kw = {'xticks': (), 'yticks': ()})
-for x in range(0,7):
-    for y in range(0,7):
-        axes[x,y].scatter(X.iloc[:, x], X.iloc[:, y], s=40)
+        fig.suptitle("Features of seed dataset")
+        plt.show()
 
-fig.suptitle("Features of seed dataset")
-plt.show()
+    gaussPrediction = alignLabels(gaussPrediction, rescale_test, n)
+    meanPrediction = alignLabels(meanPrediction, rescale_test, n)
+
+    plt.figure(1)
+    plt.suptitle("KMeans and Gaussian Mixture Clustering")
+    plt.subplot(121)
+    plt.title("Guassian Mixture")
+    plt.scatter(x_pca[:, 0], x_pca[:, 1], c=rescale_test, marker='o', s=100, label="Test data")
+    plt.scatter(x_pca[:, 0], x_pca[:, 1], c=gaussPrediction, marker='^', s=30, label="Clustering", edgecolors='white')
+    plt.xlabel("Error rate: {:.2f}%".format(errorRate(gaussPrediction, rescale_test) * 100.0))
+    plt.legend()
+    plt.subplot(122)
+    plt.title("KMeans")
+    plt.scatter(x_pca[:, 0], x_pca[:, 1], c=rescale_test, marker='o', s=100, label="Test data")
+    plt.scatter(x_pca[:, 0], x_pca[:, 1], c=meanPrediction, marker='^', s=30, label="Clustering", edgecolors='white')
+    plt.xlabel("Error rate: {:.2f}%".format(errorRate(meanPrediction, rescale_test) * 100.0))
+    plt.legend()
+    plt.show()
+
 
 def errorRate(pred, test):
     tot = 0
@@ -89,21 +110,14 @@ def alignLabels(preds, test, n_clusters):
         pred = rotateLabels(pred, n_clusters)
     return pred
 
-gaussPrediction = alignLabels(gaussPrediction, rescale_test, n)
-meanPrediction = alignLabels(meanPrediction, rescale_test, n)
 
-plt.figure(1)
-plt.suptitle("KMeans and Gaussian Mixture Clustering")
-plt.subplot(121)
-plt.title("Guassian Mixture")
-plt.scatter(x_pca[:, 0], x_pca[:, 1], c=rescale_test, marker='o', s=100, label="Test data")
-plt.scatter(x_pca[:, 0], x_pca[:, 1], c=gaussPrediction, marker='^', s=30, label="Clustering", edgecolors='white')
-plt.xlabel("Error rate: {:.2f}%".format(errorRate(gaussPrediction, rescale_test) * 100.0))
-plt.legend()
-plt.subplot(122)
-plt.title("KMeans")
-plt.scatter(x_pca[:, 0], x_pca[:, 1], c=rescale_test, marker='o', s=100, label="Test data")
-plt.scatter(x_pca[:, 0], x_pca[:, 1], c=meanPrediction, marker='^', s=30, label="Clustering", edgecolors='white')
-plt.xlabel("Error rate: {:.2f}%".format(errorRate(meanPrediction, rescale_test) * 100.0))
-plt.legend()
-plt.show()
+if __name__ == "__main__":
+    display_intermediaries = False
+    parser = argparse.ArgumentParser(description="Perform and display clustering on seeds dataset")
+    parser.add_argument('-x', '--extra', help="Display extra plots for use in feature selection etc.", action="store_true")
+
+    args = parser.parse_args()
+
+    display_intermediaries = hasattr(args, 'extra')
+    
+    run(display_intermediaries)
