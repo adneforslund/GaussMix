@@ -4,10 +4,12 @@ import argparse
 
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 from sklearn.mixture import GaussianMixture
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
-from matplotlib.patches import Circle
+from matplotlib.patches import Circle, Ellipse
+from scipy import linalg
 
 def run(display_intermediaries, path, savePath):    
     # Last datasettet
@@ -44,8 +46,7 @@ def run(display_intermediaries, path, savePath):
 
         fig.suptitle("Features of seed dataset")
         plt.show()
-
-
+        
     gaussPrediction = alignLabels(gaussPrediction, rescale_test, n)
     meanPrediction = alignLabels(meanPrediction, rescale_test, n)
     
@@ -53,29 +54,44 @@ def run(display_intermediaries, path, savePath):
     
     fig.suptitle("KMeans and Gaussian Mixture Clustering")
     means.fit(x_pca)
-    # koordinater for centroids i en array
-    C = means.cluster_centers_
+    gauss.fit(x_pca)
     
+    # Tegn KMeans cluster overlays
+    C = means.cluster_centers_
     colors = ['r', 'g', 'b']
     for i, color in zip(C, colors):
         circle = Circle((i[0], i[1]),radius=2, alpha=0.2, color=color)
         axes[1].add_artist(circle)
         center_circle = Circle((i[0], i[1]), radius = 0.1, alpha = 1, color = "black")
         axes[1].add_artist(center_circle)
-    print(str(C))
+
+    # Kode fra http://scikit-learn.org/stable/auto_examples/mixture/plot_gmm.html
+    for i, (mean, covar, color) in enumerate(zip(gauss.means_, gauss.covariances_, colors)):
+        v, w = linalg.eigh(covar)
+        v = 2. * np.sqrt(2.) * np.sqrt(v) 
+        # Plot an ellipse to show the Gaussian component
+        u = w[0] / linalg.norm(w[0])
+        angle = np.arctan(u[1] / u[0])
+        angle = 180. * angle / np.pi  # convert to degrees
+        ell = Ellipse(mean, v[0], v[1], 180. + angle, color=color)
+        ell.set_alpha(0.2)
+        axes[0].add_artist(ell)
+        print(v)
+        
+    
     axes[0].set_title("Guassian Mixture")
     axes[0].scatter(x_pca[:, 0], x_pca[:, 1], c=rescale_test,
                     marker='o', s=100, label="Test data")
     axes[0].scatter(x_pca[:, 0], x_pca[:, 1], c=gaussPrediction,
                     marker='^', s=30, label="Clustering", edgecolors='white')
-    axes[0].set_xlabel("Error rate: {:.2f}%".format(errorRate(gaussPrediction, rescale_test) * 100.0))
+    # axes[0].set_xlabel("Error rate: {:.2f}%".format(errorRate(gaussPrediction, rescale_test) * 100.0))
     axes[0].legend()
 
     axes[1].set_title("KMeans")
     axes[1].scatter(x_pca[:, 0], x_pca[:, 1], c=rescale_test, marker='o', s=100, label="Test data")
     axes[1].scatter(x_pca[:, 0], x_pca[:, 1], c=meanPrediction,
                     marker='^', s=30, label="Clustering", edgecolors='white')
-    axes[1].set_xlabel("Error rate: {:.2f}%".format(errorRate(meanPrediction, rescale_test) * 100.0))
+    # axes[1].set_xlabel("Error rate: {:.2f}%".format(errorRate(meanPrediction, rescale_test) * 100.0))
     axes[1].legend()
     if savePath != None:
         fig.savefig(savePath)
@@ -129,7 +145,7 @@ def alignLabels(preds, test, n_clusters):
 
     for i in range(0, currentRotation):
         pred = rotateLabels(pred, n_clusters)
-    return pred
+        return pred
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Display clustering for seed dataset")
