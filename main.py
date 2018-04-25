@@ -30,8 +30,8 @@ rescale_test = [i - 1 for i in y.values]
 means.fit(X)
 gauss.fit(X)
 
-gaussPrediction = gauss.predict(x_pca)
-meanPrediction = means.predict(x_pca)
+gaussPrediction = gauss.predict(X)
+meanPrediction = means.predict(X)
 
 def errorRate(pred, test):
     tot = 0
