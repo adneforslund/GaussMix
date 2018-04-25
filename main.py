@@ -65,6 +65,7 @@ def run(display_intermediaries):
         center_circle = Circle((i[0], i[1]), radius = 0.1, alpha = 1, color = "black")
         axes[1].add_artist(center_circle)
 
+    # Kode fra http://scikit-learn.org/stable/auto_examples/mixture/plot_gmm.html
     for i, (mean, covar, color) in enumerate(zip(gauss.means_, gauss.covariances_, colors)):
         v, w = linalg.eigh(covar)
         v = 2. * np.sqrt(2.) * np.sqrt(v) 
