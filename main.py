@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from sklearn.mixture import GaussianMixture
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
-
+from matplotlib.patches import Circle
 # Last datasettet
 dataset = pd.read_table("seeds_dataset.txt", delim_whitespace=True)
 
@@ -83,18 +83,25 @@ def alignLabels(preds, test, n_clusters):
 gaussPrediction = alignLabels(gaussPrediction, rescale_test, n)
 meanPrediction = alignLabels(meanPrediction, rescale_test, n)
 
-plt.figure(1)
-plt.suptitle("KMeans and Gaussian Mixture Clustering")
-plt.subplot(121)
-plt.title("Guassian Mixture")
-plt.scatter(x_pca[:, 0], x_pca[:, 1], c=rescale_test, marker='o', s=100, label="Test data")
-plt.scatter(x_pca[:, 0], x_pca[:, 1], c=gaussPrediction, marker='^', s=30, label="Clustering", edgecolors='white')
-plt.xlabel("Error rate: {:.2f}%".format(errorRate(gaussPrediction, rescale_test) * 100.0))
-plt.legend()
-plt.subplot(122)
-plt.title("KMeans")
-plt.scatter(x_pca[:, 0], x_pca[:, 1], c=rescale_test, marker='o', s=100, label="Test data")
-plt.scatter(x_pca[:, 0], x_pca[:, 1], c=meanPrediction, marker='^', s=30, label="Clustering", edgecolors='white')
-plt.xlabel("Error rate: {:.2f}%".format(errorRate(meanPrediction, rescale_test) * 100.0))
-plt.legend()
+circle1 = Circle((0.5, 0.5), color='r', alpha = 0.3, radius=5)
+fig, axes = plt.subplots(1,2)
+axes[0].add_artist(circle1)
+
+fig.suptitle("KMeans and Gaussian Mixture Clustering")
+
+axes[0].set_title("Guassian Mixture")
+axes[0].scatter(x_pca[:, 0], x_pca[:, 1], c=rescale_test,
+                marker='o', s=100, label="Test data")
+axes[0].scatter(x_pca[:, 0], x_pca[:, 1], c=gaussPrediction,
+                marker='^', s=30, label="Clustering", edgecolors='white')
+axes[0].set_xlabel("Error rate: {:.2f}%".format(errorRate(gaussPrediction, rescale_test) * 100.0))
+axes[0].legend()
+
+
+axes[1].set_title("KMeans")
+axes[1].scatter(x_pca[:, 0], x_pca[:, 1], c=rescale_test, marker='o', s=100, label="Test data")
+axes[1].scatter(x_pca[:, 0], x_pca[:, 1], c=meanPrediction,
+                marker='^', s=30, label="Clustering", edgecolors='white')
+axes[1].set_xlabel("Error rate: {:.2f}%".format(errorRate(meanPrediction, rescale_test) * 100.0))
+axes[1].legend()
 plt.show()
