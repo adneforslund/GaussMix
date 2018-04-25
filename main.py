@@ -33,6 +33,15 @@ gauss.fit(X)
 gaussPrediction = gauss.predict(X)
 meanPrediction = means.predict(X)
 
+fig, axes = plt.subplots(7, 7, figsize = (12, 12),
+                            subplot_kw = {'xticks': (), 'yticks': ()})
+for x in range(0,7):
+    for y in range(0,7):
+        axes[x,y].scatter(X.iloc[:, x], X.iloc[:, y], s=40)
+
+fig.suptitle("Features of seed dataset")
+plt.show()
+
 def errorRate(pred, test):
     tot = 0
     err = 0
