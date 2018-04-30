@@ -14,8 +14,7 @@ from scipy import linalg
 def run(display_intermediaries, path, savePath):    
     # Last datasettet
     dataset = pd.read_table(path, delim_whitespace=True)
-
-
+    
     # Fjern klassene fra datasettet
     y = dataset.iloc[:,-1]
     X = dataset.iloc[:,:-1]
@@ -26,16 +25,16 @@ def run(display_intermediaries, path, savePath):
     x_pca = pca.fit_transform(X)
 
     # Gauss clustering
-    gauss = GaussianMixture(n_components=n)
-    means = KMeans(n_clusters=n)
+    gauss = GaussianMixture(n_components=n, random_state=0)
+    kmeans = KMeans(n_clusters=n, random_state=0)
 
     # Datasettets klasser har verdiene 1..3, sett til 0..2
     rescale_test = [i - 1 for i in y.values]
-    means.fit(X)
+    kmeans.fit(X)
     gauss.fit(X)
 
+    meanPrediction = kmeans.predict(X)
     gaussPrediction = gauss.predict(X)
-    meanPrediction = means.predict(X)
 
     if display_intermediaries:
         fig, axes = plt.subplots(7, 7, figsize = (12, 12),
@@ -49,15 +48,15 @@ def run(display_intermediaries, path, savePath):
         
     gaussPrediction = alignLabels(gaussPrediction, rescale_test, n)
     meanPrediction = alignLabels(meanPrediction, rescale_test, n)
-    
+
     fig, axes = plt.subplots(1,2)
     
     fig.suptitle("KMeans and Gaussian Mixture Clustering")
-    means.fit(x_pca)
+    kmeans.fit(x_pca)
     gauss.fit(x_pca)
     
     # Tegn KMeans cluster overlays
-    C = means.cluster_centers_
+    C = kmeans.cluster_centers_
     colors = ['r', 'g', 'b']
     for i, color in zip(C, colors):
         circle = Circle((i[0], i[1]),radius=2, alpha=0.2, color=color)
@@ -78,28 +77,27 @@ def run(display_intermediaries, path, savePath):
         axes[0].add_artist(ell)
         print(v)
         
-    
     axes[0].set_title("Guassian Mixture")
     axes[0].scatter(x_pca[:, 0], x_pca[:, 1], c=rescale_test,
                     marker='o', s=100, label="Test data")
     axes[0].scatter(x_pca[:, 0], x_pca[:, 1], c=gaussPrediction,
                     marker='^', s=30, label="Clustering", edgecolors='white')
-    # axes[0].set_xlabel("Error rate: {:.2f}%".format(errorRate(gaussPrediction, rescale_test) * 100.0))
+    axes[0].set_xlabel("Error rate: {:.2f}%".format(errorRate(gaussPrediction, rescale_test) * 100.0))
     axes[0].legend()
 
     axes[1].set_title("KMeans")
     axes[1].scatter(x_pca[:, 0], x_pca[:, 1], c=rescale_test, marker='o', s=100, label="Test data")
     axes[1].scatter(x_pca[:, 0], x_pca[:, 1], c=meanPrediction,
                     marker='^', s=30, label="Clustering", edgecolors='white')
-    # axes[1].set_xlabel("Error rate: {:.2f}%".format(errorRate(meanPrediction, rescale_test) * 100.0))
+    axes[1].set_xlabel("Error rate: {:.2f}%".format(errorRate(meanPrediction, rescale_test) * 100.0))
     axes[1].legend()
+    
     if savePath != None:
         fig.savefig(savePath)
+        
     plt.show()
 
     
-    
-
 def errorRate(pred, test):
     tot = 0
     err = 0
