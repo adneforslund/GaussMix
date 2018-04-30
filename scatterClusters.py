@@ -1,15 +1,15 @@
 # -*- encoding: utf-8 -*-
 
 import argparse
-
-import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.mixture import GaussianMixture
-from sklearn.decomposition import PCA
-from sklearn.cluster import KMeans
+import pandas as pd
 from matplotlib.patches import Circle, Ellipse
 from scipy import linalg
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+from sklearn.mixture import GaussianMixture
+
 
 def run(display_intermediaries, path, savePath):    
     # Last datasettet
