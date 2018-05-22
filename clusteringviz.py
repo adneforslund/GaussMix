@@ -12,15 +12,15 @@ from matplotlib.patches import Circle, Ellipse
 from scipy import linalg
 
 def run(display_intermediaries, path, save_path):
-    # Last datasettet
+    # Load the dataset
     dataset = pd.read_table(path, delim_whitespace=True)
     
-    # Fjern klassene fra datasettet
+    # Remove classes from dataset
     y = dataset.iloc[:,-1]
     X = dataset.iloc[:,:-1]
     n = 3
 
-    # Dekomponer til to akser
+    # Decompose to two axises
     pca = PCA(n_components=2)
     x_pca = pca.fit_transform(X)
 
@@ -28,7 +28,7 @@ def run(display_intermediaries, path, save_path):
     gauss = GaussianMixture(n_components=n, random_state=0)
     kmeans = KMeans(n_clusters=n, random_state=0)
 
-    # Datasettets klasser har verdiene 1..3, sett til 0..2
+    # Change the dataset class values from 1..3 to 0..2
     rescale_test = [i - 1 for i in y.values]
     kmeans.fit(X)
     gauss.fit(X)
@@ -55,7 +55,7 @@ def run(display_intermediaries, path, save_path):
     kmeans.fit(x_pca)
     gauss.fit(x_pca)
     
-    # Tegn KMeans cluster overlays
+    # Draw KMeans cluster overlays
     C = kmeans.cluster_centers_
     colors = ['r', 'g', 'b']
     for i, color in zip(C, colors):
@@ -64,7 +64,7 @@ def run(display_intermediaries, path, save_path):
         center_circle = Circle((i[0], i[1]), radius = 0.1, alpha = 1, color = "black")
         axes[1].add_artist(center_circle)
 
-    # Kode fra http://scikit-learn.org/stable/auto_examples/mixture/plot_gmm.html
+    # Code from http://scikit-learn.org/stable/auto_examples/mixture/plot_gmm.html
     for i, (mean, covar, color) in enumerate(zip(gauss.means_, gauss.covariances_, colors)):
         v, w = linalg.eigh(covar)
         v = 2. * np.sqrt(2.) * np.sqrt(v) 
@@ -96,7 +96,8 @@ def run(display_intermediaries, path, save_path):
         
     plt.show()
 
-    
+
+    # Calculate the error rate when there are known classes for the clusters
 def error_rate(pred, test):
     tot = 0
     err = 0
@@ -106,7 +107,7 @@ def error_rate(pred, test):
         tot += 1
     return float(err) / float(tot)
 
-
+    # Changes labels for clusters
 def flip_labels(pred):
     labels = []
     for prediction in pred:
@@ -123,6 +124,7 @@ def rotate_labels(pred, n_clusters):
     return [(p + 1) % n_clusters for p in pred]
     
 
+    # Tries to match labels from the dataset with the real labels
 def align_labels(preds, test, n_clusters):
     smallest = 1.1
     current_rotation = 0
@@ -146,6 +148,7 @@ def align_labels(preds, test, n_clusters):
         pred = rotate_labels(pred, n_clusters)
         return pred
 
+    # handles commandline arguments and runs program
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Display clustering for seed dataset")
     parser.add_argument("-f", "--file", dest="my_path",
