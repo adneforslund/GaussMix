@@ -18,16 +18,16 @@ Arguments:
 
 Examples:
 
-python scatterCluster.py -h
+python clusteringviz.py -h
   - To get help using the program
  
-python -f path/to/seeds.txt
+python clusteringviz -f path/to/seeds.txt
   - To run the program on a dataset, and draw a scatter plot of both the KMeans and Gaussian algorhitms.
 
-python -f path/to/seeds.txt -x
+python clusteringviz -f path/to/seeds.txt -x
 	- Display extra plots of features
 
-python -f path/to/seeds.txt -s path/to/directory/picture.png
+python clusteringviz -f path/to/seeds.txt -s path/to/directory/picture.png
 	- saves the plot in a directory, in this case as a png
 
 

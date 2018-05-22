@@ -1,0 +1,5 @@
+To run the program, use the following command:
+python clusteringviz.py -f PATHTOSEEDDATASET.txt
+
+For more, try:
+python clusteringviz.py -h
