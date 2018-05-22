@@ -11,7 +11,7 @@ from sklearn.cluster import KMeans
 from matplotlib.patches import Circle, Ellipse
 from scipy import linalg
 
-def run(display_intermediaries, path, savePath):    
+def run(display_intermediaries, path, save_path):
     # Last datasettet
     dataset = pd.read_table(path, delim_whitespace=True)
     
@@ -33,8 +33,8 @@ def run(display_intermediaries, path, savePath):
     kmeans.fit(X)
     gauss.fit(X)
 
-    meanPrediction = kmeans.predict(X)
-    gaussPrediction = gauss.predict(X)
+    mean_prediction = kmeans.predict(X)
+    gauss_prediction = gauss.predict(X)
 
     if display_intermediaries:
         fig, axes = plt.subplots(7, 7, figsize = (12, 12),
@@ -46,8 +46,8 @@ def run(display_intermediaries, path, savePath):
         fig.suptitle("Features of seed dataset")
         plt.show()
         
-    gaussPrediction = alignLabels(gaussPrediction, rescale_test, n)
-    meanPrediction = alignLabels(meanPrediction, rescale_test, n)
+    gauss_prediction = align_labels(gauss_prediction, rescale_test, n)
+    mean_prediction = align_labels(mean_prediction, rescale_test, n)
 
     fig, axes = plt.subplots(1,2)
     
@@ -79,25 +79,25 @@ def run(display_intermediaries, path, savePath):
     axes[0].set_title("Guassian Mixture")
     axes[0].scatter(x_pca[:, 0], x_pca[:, 1], c=rescale_test,
                     marker='o', s=100, label="Test data")
-    axes[0].scatter(x_pca[:, 0], x_pca[:, 1], c=gaussPrediction,
+    axes[0].scatter(x_pca[:, 0], x_pca[:, 1], c=gauss_prediction,
                     marker='^', s=30, label="Clustering", edgecolors='white')
-    axes[0].set_xlabel("Error rate: {:.2f}%".format(errorRate(gaussPrediction, rescale_test) * 100.0))
+    axes[0].set_xlabel("Error rate: {:.2f}%".format(error_rate(gauss_prediction, rescale_test) * 100.0))
     axes[0].legend()
 
     axes[1].set_title("KMeans")
     axes[1].scatter(x_pca[:, 0], x_pca[:, 1], c=rescale_test, marker='o', s=100, label="Test data")
-    axes[1].scatter(x_pca[:, 0], x_pca[:, 1], c=meanPrediction,
+    axes[1].scatter(x_pca[:, 0], x_pca[:, 1], c=mean_prediction,
                     marker='^', s=30, label="Clustering", edgecolors='white')
-    axes[1].set_xlabel("Error rate: {:.2f}%".format(errorRate(meanPrediction, rescale_test) * 100.0))
+    axes[1].set_xlabel("Error rate: {:.2f}%".format(error_rate(mean_prediction, rescale_test) * 100.0))
     axes[1].legend()
     
-    if savePath != None:
-        fig.savefig(savePath)
+    if save_path != None:
+        fig.savefig(save_path)
         
     plt.show()
 
     
-def errorRate(pred, test):
+def error_rate(pred, test):
     tot = 0
     err = 0
     for i in range(0, len(test)):
@@ -106,7 +106,7 @@ def errorRate(pred, test):
         tot += 1
     return float(err) / float(tot)
 
-def flipLabels(pred):
+def flip_labels(pred):
     l = []
     for p in pred:
         if p == 0:
@@ -117,43 +117,43 @@ def flipLabels(pred):
             l.append(2)
     return l
             
-def rotateLabels(pred, n_clusters):
+def rotate_labels(pred, n_clusters):
     return [(p + 1) % n_clusters for p in pred]
     
 
-def alignLabels(preds, test, n_clusters):
+def align_labels(preds, test, n_clusters):
     smallest = 1.1
-    currentRotation = 0
+    current_rotation = 0
     flipped = 0
     pred = preds
     for c in range(0,2):
         for i in range(0, n_clusters):
-            err = errorRate(pred, test)
+            err = error_rate(pred, test)
             if err < smallest:
                 smallest = err
-                currentRotation = i
+                current_rotation = i
                 flipped = c % 2
-            pred = rotateLabels(pred, n_clusters)
-        pred = flipLabels(pred)
+            pred = rotate_labels(pred, n_clusters)
+        pred = flip_labels(pred)
         
     pred = preds
     if flipped == 1:
-        pred = flipLabels(pred)
+        pred = flip_labels(pred)
 
-    for i in range(0, currentRotation):
-        pred = rotateLabels(pred, n_clusters)
+    for i in range(0, current_rotation):
+        pred = rotate_labels(pred, n_clusters)
         return pred
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Display clustering for seed dataset")
-    parser.add_argument("-f", "--file", dest="myPath",
+    parser.add_argument("-f", "--file", dest="my_path",
                         help="Give a path to your dataset", required=True
                         )
     parser.add_argument("-x", "--extra", help="Display extra plots", action="store_true", required = False)
-    parser.add_argument("-s", "--save", help="Save plots as png, given pathname", required = False, dest="savePath"  )
+    parser.add_argument("-s", "--save", help="Save plots as png, given pathname", required = False, dest="save_path"  )
     args = parser.parse_args()
-    path = args.myPath
-    savePath = args.savePath
+    path = args.my_path
+    save_path = args.save_path
     
     display_intermediaries = args.extra
-    run(display_intermediaries, path, savePath)
+    run(display_intermediaries, path, save_path)
