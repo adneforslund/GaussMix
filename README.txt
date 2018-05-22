@@ -7,6 +7,7 @@ Dependencies:
 - Python 3
 - Pandas
 - Scipy
+- NLTK
 
 To run the program, run it as python(or python3) in your command line.
 
