@@ -106,17 +106,19 @@ def error_rate(pred, test):
         tot += 1
     return float(err) / float(tot)
 
+
 def flip_labels(pred):
-    l = []
-    for p in pred:
-        if p == 0:
-            l.append(1)
-        elif p == 1:
-            l.append(0)
+    labels = []
+    for prediction in pred:
+        if prediction == 0:
+            labels.append(1)
+        elif prediction == 1:
+            labels.append(0)
         else:
-            l.append(2)
-    return l
-            
+            labels.append(2)
+    return labels
+
+
 def rotate_labels(pred, n_clusters):
     return [(p + 1) % n_clusters for p in pred]
     
