@@ -126,13 +126,13 @@ def align_labels(preds, test, n_clusters):
     current_rotation = 0
     flipped = 0
     pred = preds
-    for c in range(0,2):
-        for i in range(0, n_clusters):
+    for do_flip in range(0,2):
+        for current_cluster in range(0, n_clusters):
             err = error_rate(pred, test)
             if err < smallest:
                 smallest = err
-                current_rotation = i
-                flipped = c % 2
+                current_rotation = current_cluster
+                flipped = do_flip % 2
             pred = rotate_labels(pred, n_clusters)
         pred = flip_labels(pred)
         
