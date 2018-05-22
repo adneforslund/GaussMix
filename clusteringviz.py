@@ -12,10 +12,10 @@ from matplotlib.patches import Circle, Ellipse
 from scipy import linalg
 
 def run(display_intermediaries, path, save_path):
-    # Last datasettet
+    # load dataset
     dataset = pd.read_table(path, delim_whitespace=True)
     
-    # Fjern klassene fra datasettet
+    # Remove classes from dataset
     y = dataset.iloc[:,-1]
     X = dataset.iloc[:,:-1]
     n = 3
@@ -27,8 +27,8 @@ def run(display_intermediaries, path, save_path):
     # Gauss clustering
     gauss = GaussianMixture(n_components=n, random_state=0)
     kmeans = KMeans(n_clusters=n, random_state=0)
-
-    # Datasettets klasser har verdiene 1..3, sett til 0..2
+    
+    # The classes in the dataset have the values 1..3, set to 0..2
     rescale_test = [i - 1 for i in y.values]
     kmeans.fit(X)
     gauss.fit(X)
@@ -55,7 +55,7 @@ def run(display_intermediaries, path, save_path):
     kmeans.fit(x_pca)
     gauss.fit(x_pca)
     
-    # Tegn KMeans cluster overlays
+    # Draw KMeans cluster overlays
     C = kmeans.cluster_centers_
     colors = ['r', 'g', 'b']
     for i, color in zip(C, colors):
@@ -64,7 +64,7 @@ def run(display_intermediaries, path, save_path):
         center_circle = Circle((i[0], i[1]), radius = 0.1, alpha = 1, color = "black")
         axes[1].add_artist(center_circle)
 
-    # Kode fra http://scikit-learn.org/stable/auto_examples/mixture/plot_gmm.html
+    # code from http://scikit-learn.org/stable/auto_examples/mixture/plot_gmm.html
     for i, (mean, covar, color) in enumerate(zip(gauss.means_, gauss.covariances_, colors)):
         v, w = linalg.eigh(covar)
         v = 2. * np.sqrt(2.) * np.sqrt(v) 
@@ -96,7 +96,7 @@ def run(display_intermediaries, path, save_path):
         
     plt.show()
 
-    
+ # calculates error rates   
 def error_rate(pred, test):
     tot = 0
     err = 0
@@ -145,7 +145,7 @@ def align_labels(preds, test, n_clusters):
     for i in range(0, current_rotation):
         pred = rotate_labels(pred, n_clusters)
         return pred
-
+# main function 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Display clustering for seed dataset")
     parser.add_argument("-f", "--file", dest="my_path",
