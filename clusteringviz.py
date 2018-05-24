@@ -26,8 +26,8 @@ def run(display_intermediaries, path, save_path):
     x_pca = pca.fit_transform(X)
 
     # Gauss clustering
-    gauss = GaussianMixture(n_components=number_of_clusters, random_state=0)
-    kmeans = KMeans(n_clusters=number_of_clusters, random_state=0)
+    gauss = GaussianMixture(n_components=number_of_clusters, random_state=0, covariance_type='full', tol=0.0001, max_iter=100, n_init=1)
+    kmeans = KMeans(n_clusters=number_of_clusters, random_state=0, n_init=1, tol=0.0001, max_iter=300)
 
     # Change the dataset class values from 1..3 to 0..2
     rescale_test = [i - 1 for i in y.values]
