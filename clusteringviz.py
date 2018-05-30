@@ -21,12 +21,12 @@ def run(display_intermediaries, path, save_path):
     X = dataset.iloc[:,:-1]
     number_of_clusters = 3
 
-    # Decompose to two axises
+    # Decompose to two axes
     pca = PCA(n_components=2)
     x_pca = pca.fit_transform(X)
 
     # Gauss clustering
-    gauss = GaussianMixture(n_components=number_of_clusters, random_state=0, covariance_type='full', tol=0.0001, max_iter=100, n_init=1)
+    gauss = GaussianMixture(n_components=number_of_clusters, random_state=0, reg_covar=0.00001, covariance_type='full', tol=0.00001, max_iter=100, n_init=1)
     kmeans = KMeans(n_clusters=number_of_clusters, random_state=0, n_init=1, tol=0.0001, max_iter=300)
 
     # Change the dataset class values from 1..3 to 0..2
@@ -65,8 +65,6 @@ def run(display_intermediaries, path, save_path):
     for i, color in zip(cluster_centers, colors):
         circle = Circle((i[0], i[1]),radius=2, alpha=0.2, color=color)
         axes[1].add_artist(circle)
-        center_circle = Circle((i[0], i[1]), radius = 0.1, alpha = 1, color = "black")
-        axes[1].add_artist(center_circle)
 
     # Code from http://scikit-learn.org/stable/auto_examples/mixture/plot_gmm.html
     for i, (mean, covar, color) in enumerate(zip(gauss.means_, gauss.covariances_, colors)):
