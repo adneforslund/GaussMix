@@ -7,10 +7,14 @@ import numpy as np
 import pandas as pd
 from matplotlib.patches import Circle, Ellipse
 from scipy import linalg
+<<<<<<< HEAD
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.mixture import GaussianMixture
 
+=======
+from sklearn.metrics import silhouette_score
+>>>>>>> f1fe9a302539ddf9ebc0289ce267982f95a6274d
 
 def run(display_intermediaries, path, save_path):
     # Load the dataset
@@ -19,23 +23,26 @@ def run(display_intermediaries, path, save_path):
     # Remove classes from dataset
     y = dataset.iloc[:,-1]
     X = dataset.iloc[:,:-1]
-    n = 3
+    number_of_clusters = 3
 
-    # Decompose to two axises
+    # Decompose to two axes
     pca = PCA(n_components=2)
     x_pca = pca.fit_transform(X)
 
     # Gauss clustering
-    gauss = GaussianMixture(n_components=n, random_state=0)
-    kmeans = KMeans(n_clusters=n, random_state=0)
+    gauss = GaussianMixture(n_components=number_of_clusters, random_state=0, reg_covar=0.00001, covariance_type='full', tol=0.00001, max_iter=100, n_init=1)
+    kmeans = KMeans(n_clusters=number_of_clusters, random_state=0, n_init=1, tol=0.0001, max_iter=300)
 
     # Change the dataset class values from 1..3 to 0..2
     rescale_test = [i - 1 for i in y.values]
     kmeans.fit(X)
     gauss.fit(X)
 
-    mean_prediction = kmeans.predict(X)
+    kmean_prediction = kmeans.predict(X)
     gauss_prediction = gauss.predict(X)
+
+    kmeans_silhouette = silhouette_score(X, kmean_prediction, random_state=0 )
+    gaus_silhouette = silhouette_score(X, gauss_prediction, random_state=0)
 
     if display_intermediaries:
         fig, axes = plt.subplots(7, 7, figsize = (12, 12),
@@ -47,8 +54,8 @@ def run(display_intermediaries, path, save_path):
         fig.suptitle("Features of seed dataset")
         plt.show()
         
-    gauss_prediction = align_labels(gauss_prediction, rescale_test, n)
-    mean_prediction = align_labels(mean_prediction, rescale_test, n)
+    gauss_prediction = align_labels(gauss_prediction, rescale_test, number_of_clusters)
+    kmean_prediction = align_labels(kmean_prediction, rescale_test, number_of_clusters)
 
     fig, axes = plt.subplots(1,2)
     
@@ -57,18 +64,16 @@ def run(display_intermediaries, path, save_path):
     gauss.fit(x_pca)
     
     # Draw KMeans cluster overlays
-    C = kmeans.cluster_centers_
+    cluster_centers = kmeans.cluster_centers_
     colors = ['r', 'g', 'b']
-    for i, color in zip(C, colors):
+    for i, color in zip(cluster_centers, colors):
         circle = Circle((i[0], i[1]),radius=2, alpha=0.2, color=color)
         axes[1].add_artist(circle)
-        center_circle = Circle((i[0], i[1]), radius = 0.1, alpha = 1, color = "black")
-        axes[1].add_artist(center_circle)
 
     # Code from http://scikit-learn.org/stable/auto_examples/mixture/plot_gmm.html
     for i, (mean, covar, color) in enumerate(zip(gauss.means_, gauss.covariances_, colors)):
         v, w = linalg.eigh(covar)
-        v = 2. * np.sqrt(2.) * np.sqrt(v) 
+        v = 2. * np.sqrt(2.) * np.sqrt(v)
         # Plot an ellipse to show the Gaussian component
         u = w[0] / linalg.norm(w[0])
         angle = np.arctan(u[1] / u[0])
@@ -76,37 +81,37 @@ def run(display_intermediaries, path, save_path):
         ell = Ellipse(mean, v[0], v[1], 180. + angle, color=color)
         ell.set_alpha(0.2)
         axes[0].add_artist(ell)
-        
+
     axes[0].set_title("Guassian Mixture")
     axes[0].scatter(x_pca[:, 0], x_pca[:, 1], c=rescale_test,
                     marker='o', s=100, label="Test data")
     axes[0].scatter(x_pca[:, 0], x_pca[:, 1], c=gauss_prediction,
                     marker='^', s=30, label="Clustering", edgecolors='white')
-    axes[0].set_xlabel("Error rate: {:.2f}%".format(error_rate(gauss_prediction, rescale_test) * 100.0))
+    axes[0].set_xlabel("Error rate: {:.2f}% \nSilhouette score: {:.2f}".format(error_rate(gauss_prediction, rescale_test) * 100.0, gaus_silhouette))
     axes[0].legend()
 
     axes[1].set_title("KMeans")
     axes[1].scatter(x_pca[:, 0], x_pca[:, 1], c=rescale_test, marker='o', s=100, label="Test data")
-    axes[1].scatter(x_pca[:, 0], x_pca[:, 1], c=mean_prediction,
+    axes[1].scatter(x_pca[:, 0], x_pca[:, 1], c=kmean_prediction,
                     marker='^', s=30, label="Clustering", edgecolors='white')
-    axes[1].set_xlabel("Error rate: {:.2f}%".format(error_rate(mean_prediction, rescale_test) * 100.0))
+    axes[1].set_xlabel("Error rate: {:.2f}% \nSilhouette score: {:.2f}".format(error_rate(kmean_prediction, rescale_test) * 100.0, kmeans_silhouette))
     axes[1].legend()
-    
+
     if save_path != None:
         fig.savefig(save_path)
-        
+
     plt.show()
 
 
     # Calculate the error rate when there are known classes for the clusters
 def error_rate(pred, test):
-    tot = 0
-    err = 0
+    total = 0
+    errors = 0
     for i in range(0, len(test)):
         if pred[i] != test[i]:
-            err += 1
-        tot += 1
-    return float(err) / float(tot)
+            errors += 1
+        total += 1
+    return float(errors) / float(total)
 
     # Changes labels for clusters
 def flip_labels(pred):
@@ -127,20 +132,23 @@ def rotate_labels(pred, n_clusters):
 
     # Tries to match labels from the dataset with the real labels
 def align_labels(preds, test, n_clusters):
-    smallest = 1.1
+    smallest_error = 1.1
     current_rotation = 0
     flipped = 0
+
+    # Set the list positions to the default state
     pred = preds
     for do_flip in range(0,2):
         for current_cluster in range(0, n_clusters):
-            err = error_rate(pred, test)
-            if err < smallest:
-                smallest = err
+            error = error_rate(pred, test)
+            if error < smallest_error:
+                smallest_error = error
                 current_rotation = current_cluster
                 flipped = do_flip % 2
             pred = rotate_labels(pred, n_clusters)
         pred = flip_labels(pred)
-        
+
+    # Reset the list positions and rotate them to the best prediction
     pred = preds
     if flipped == 1:
         pred = flip_labels(pred)
